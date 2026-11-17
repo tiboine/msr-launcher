@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Installer MSR Launcher
+Comment=Installerer startskjermen til Makerspace Ringebu på denne maskinen
+Exec=bash -c 'cd "$(dirname "%k")" && bash INSTALLER.sh'
+Terminal=true
+Icon=system-software-install

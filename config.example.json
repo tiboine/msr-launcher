@@ -8,8 +8,6 @@
     "homepage": "https://www.makerspaceringebu.no/",
     "allowed": [
       "https://www.makerspaceringebu.no/*",
-      "https://*.tinkercad.com/*",
-      "https://*.autodesk.com/*",
       "https://makerworld.com/*"
     ]
   },
@@ -75,15 +73,6 @@
       "icon": "cube",
       "color": "#ff7a18",
       "url": "https://www.makerspaceringebu.no/makercraft/"
-    },
-    {
-      "id": "tinkercad",
-      "name": "Tinkercad",
-      "description": "3D-tegning i nettleseren",
-      "category": "3d",
-      "icon": "bricks",
-      "color": "#00d9e9",
-      "url": "https://www.tinkercad.com/"
     },
     {
       "id": "makerlaser",

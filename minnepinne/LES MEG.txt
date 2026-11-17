@@ -1,0 +1,24 @@
+MSR LAUNCHER – INSTALLASJON FRA MINNEPINNE
+==========================================
+
+Logg inn på Mint-maskinen med ADMIN-kontoen (ikke makerspace-kontoen).
+Maskinen må ha nett.
+
+Enkleste måte:
+  Dobbeltklikk «Installer MSR Launcher».
+  Spør Mint om du stoler på den, velg «Kjør likevel» / «Merk som klarert».
+
+Hvis dobbeltklikk ikke virker:
+  1. Høyreklikk på et tomt sted i minnepinne-mappa → «Åpne i terminal»
+  2. Skriv:   sudo bash INSTALLER.sh
+  3. Skriv passordet ditt (det vises ingen tegn – det er normalt)
+
+Installasjonen spør om:
+  - hvilken konto som er makerspace-kontoen   → velg nummeret
+  - adressen til oppsettet                     → bare trykk Enter
+  - PIN for vedlikehold                        → velg en kode, f.eks. 4 siffer
+
+Når den er ferdig: logg ut, og logg inn som makerspace-brukeren.
+
+Oppdatere senere: kjør det samme på nytt (innstillingene beholdes).
+Vedlikehold på startskjermen: hold inne logoen i 3 sekunder → PIN.

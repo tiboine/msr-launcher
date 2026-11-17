@@ -52,13 +52,13 @@ I oppsettet:
 "firefox": {
   "lock": true,
   "homepage": "https://www.makerspaceringebu.no/",
-  "allowed": ["https://*.autodesk.com/*", "https://makerworld.com/*"]
+  "allowed": ["https://makerworld.com/*", "https://*.bambulab.com/*"]
 }
 ```
 - Alle nettside-fliser (`"url"`) i launcheren blir **automatisk tillatt**, og
   dukker opp i bokmerkelinja under «Makerspace».
-- `allowed`: ekstra adresser som må virke (f.eks. innlogging til Tinkercad via
-  Autodesk). `*.` foran domenet tar med alle underdomener.
+- `allowed`: ekstra adresser som må virke (f.eks. innlogging som går via et annet
+  nettsted). `*.` foran domenet tar med alle underdomener.
 - Alt annet blokkeres. Utviklerverktøy, privat vindu, `about:config` og
   utvidelser er også sperret.
 - `"lock": false` fjerner låsingen igjen.

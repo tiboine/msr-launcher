@@ -2,7 +2,8 @@
 # Installerer MSR Launcher på en Linux Mint-maskin (Cinnamon).
 #
 # Bruk (fra mappa med launcheren):
-#   sudo ./install-mint.sh <brukernavn>          # f.eks. sudo ./install-mint.sh makerspace
+#   sudo bash install-mint.sh                    # spør etter brukeren
+#   sudo bash install-mint.sh <brukernavn>       # f.eks. makerspace
 #   sudo ./install-mint.sh <brukernavn> --no-lock  # uten å låse skrivebordsbakgrunnen
 #
 # Kan kjøres på nytt for å oppdatere — innstillingene i /etc/msr-launcher beholdes.
@@ -12,10 +13,25 @@ USERNAME="${1:-}"
 LOCK=1
 [[ "${2:-}" == "--no-lock" ]] && LOCK=0
 
-if [[ $EUID -ne 0 ]]; then echo "Kjør med sudo."; exit 1; fi
-if [[ -z "$USERNAME" ]] || ! id "$USERNAME" &>/dev/null; then
-  echo "Oppgi brukernavnet til makerspace-kontoen, f.eks.: sudo $0 makerspace"; exit 1
+if [[ $EUID -ne 0 ]]; then echo "Kjør med sudo, f.eks.:  sudo bash $0"; exit 1; fi
+
+# Uten brukernavn: vis brukerne på maskinen og spør
+if [[ -z "$USERNAME" ]]; then
+  mapfile -t USERS < <(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 && $6 ~ /^\/home\// {print $1}')
+  echo
+  echo "Hvilken konto er makerspace-kontoen (den launcheren skal starte på)?"
+  for i in "${!USERS[@]}"; do echo "  $((i + 1))) ${USERS[$i]}"; done
+  read -rp "Skriv nummer eller brukernavn: " CHOICE < /dev/tty
+  if [[ "$CHOICE" =~ ^[0-9]+$ ]] && (( CHOICE >= 1 && CHOICE <= ${#USERS[@]} )); then
+    USERNAME="${USERS[$((CHOICE - 1))]}"
+  else
+    USERNAME="$CHOICE"
+  fi
 fi
+if [[ -z "$USERNAME" ]] || ! id "$USERNAME" &>/dev/null; then
+  echo "Fant ikke brukeren «$USERNAME». Prøv igjen."; exit 1
+fi
+echo "==> Installerer for brukeren: $USERNAME"
 USER_HOME="$(getent passwd "$USERNAME" | cut -d: -f6)"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 DEST=/opt/msr-launcher
@@ -53,9 +69,9 @@ echo "==> Innstillinger i $ETC/settings.json"
 mkdir -p "$ETC" "$VAR"
 if [[ ! -f "$ETC/settings.json" ]]; then
   DEFAULT_URL="https://www.makerspaceringebu.no/wp-json/msr-launcher/v1/config"
-  read -rp "    Adresse til oppsettet [$DEFAULT_URL]: " CFG_URL || true
+  read -rp "    Adresse til oppsettet [$DEFAULT_URL]: " CFG_URL < /dev/tty || true
   CFG_URL="${CFG_URL:-$DEFAULT_URL}"
-  read -rp "    PIN for å avslutte launcheren (tom = av): " PIN || true
+  read -rp "    PIN for vedlikehold (tom = av): " PIN < /dev/tty || true
   cat > "$ETC/settings.json" <<EOF
 {
   "config_url": "${CFG_URL:-}",
