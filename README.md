@@ -41,6 +41,31 @@ lagrede kopi.
 - Nettside i stedet for program: bruk `"url": "https://…"` i stedet for `cmd`.
 - `icon`: emoji eller adresse til et bilde (png/svg).
 
+### Låse Firefox til bestemte nettsider
+I oppsettet:
+```json
+"firefox": {
+  "lock": true,
+  "homepage": "https://www.makerspaceringebu.no/",
+  "allowed": ["https://*.autodesk.com/*", "https://makerworld.com/*"]
+}
+```
+- Alle nettside-fliser (`"url"`) i launcheren blir **automatisk tillatt**, og
+  dukker opp i bokmerkelinja under «Makerspace».
+- `allowed`: ekstra adresser som må virke (f.eks. innlogging til Tinkercad via
+  Autodesk). `*.` foran domenet tar med alle underdomener.
+- Alt annet blokkeres. Utviklerverktøy, privat vindu, `about:config` og
+  utvidelser er også sperret.
+- `"lock": false` fjerner låsingen igjen.
+
+`msr-sync.py` kjører som root hvert 15. min (systemd: `msr-sync.timer`), henter
+oppsettet og skriver `/etc/firefox/policies/policies.json`. Reglene gjelder
+**alle brukere på maskinen**, også admin. Kjør synken med en gang:
+`sudo systemctl start msr-sync`, se loggen: `journalctl -u msr-sync`.
+
+Hvis en nettside ikke laster riktig (f.eks. innlogging som går via et annet
+domene), se hvilket domene Firefox blokkerer og legg det til i `allowed`.
+
 ## Installere på Mint
 Kopier mappa til maskinen (minnepinne eller `git clone`), og kjør:
 ```bash

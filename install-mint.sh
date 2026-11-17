@@ -41,7 +41,7 @@ fi
 
 echo "==> Kopierer filer til $DEST"
 mkdir -p "$DEST"
-cp -r "$SRC/launcher.py" "$SRC/config.example.json" "$SRC/ui" "$DEST/"
+cp -r "$SRC/launcher.py" "$SRC/msr-sync.py" "$SRC/config.example.json" "$SRC/ui" "$DEST/"
 
 cat > /usr/local/bin/msr-launcher <<EOF
 #!/bin/sh
@@ -65,7 +65,32 @@ if [[ ! -f "$ETC/settings.json" ]]; then
 EOF
 fi
 chmod 644 "$ETC/settings.json"
-chown "$USERNAME" "$VAR"
+
+echo "==> Synk-tjeneste (Firefox-regler + bakgrunn, hvert 15. min)"
+cat > /etc/systemd/system/msr-sync.service <<EOF
+[Unit]
+Description=MSR: hent oppsett fra nettsiden (Firefox-regler, bakgrunn)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 $DEST/msr-sync.py
+EOF
+cat > /etc/systemd/system/msr-sync.timer <<'EOF'
+[Unit]
+Description=MSR: hent oppsett jevnlig
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target
+EOF
+systemctl daemon-reload
+systemctl enable --now msr-sync.timer >/dev/null
+systemctl start msr-sync.service || echo "    (synk feilet – sjekk: journalctl -u msr-sync)"
 
 echo "==> Menyoppføring, skrivebordsikon og autostart"
 cat > /usr/share/applications/msr-launcher.desktop <<'EOF'
@@ -93,7 +118,6 @@ if [[ $LOCK -eq 1 ]]; then
     for f in /usr/share/backgrounds/linuxmint/default_background.jpg /usr/share/backgrounds/linuxmint/*.jpg; do
       [[ -f "$f" ]] && { cp "$f" "$VAR/wallpaper.jpg"; break; }
     done
-    chown "$USERNAME" "$VAR/wallpaper.jpg" 2>/dev/null || true
   fi
   mkdir -p /etc/dconf/profile /etc/dconf/db/local.d/locks
   if [[ ! -f /etc/dconf/profile/user ]]; then
@@ -116,3 +140,4 @@ fi
 echo
 echo "Ferdig! Logg inn som $USERNAME for å se launcheren."
 echo "Innstillinger: $ETC/settings.json   ·   Programfiler: $DEST"
+echo "Firefox-regler: /etc/firefox/policies/policies.json (gjelder ALLE brukere; slås av med \"lock\": false i oppsettet)"

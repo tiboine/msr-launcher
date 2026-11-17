@@ -117,23 +117,7 @@ def prepare_apps(cfg: dict) -> list[dict]:
     return out
 
 
-def sync_wallpaper(cfg: dict, settings: dict):
-    """Laster ned skrivebordsbakgrunn fra config til fast sti (Linux, låst med dconf)."""
-    url = cfg.get("desktop_wallpaper")
-    target = settings.get("wallpaper_path")
-    if not url or not target:
-        return
-    try:
-        data = fetch_url(url, timeout=15)
-        tp = Path(target)
-        if tp.is_file() and tp.read_bytes() == data:
-            return
-        tmp = tp.with_suffix(".tmp")
-        tmp.write_bytes(data)
-        tmp.replace(tp)
-        log("skrivebordsbakgrunn oppdatert")
-    except Exception as e:  # noqa: BLE001
-        log("bakgrunn ikke oppdatert:", e)
+# Skrivebordsbakgrunn og Firefox-regler håndteres av msr-sync.py (kjører som root).
 
 
 class Api:
@@ -165,7 +149,6 @@ class Api:
     def reload(self):
         self.cfg, self.source = load_config(self.settings)
         self.apps_raw = {a.get("id"): a for a in self.cfg.get("apps", [])}
-        threading.Thread(target=sync_wallpaper, args=(self.cfg, self.settings), daemon=True).start()
         return self.get_state()
 
     # ---- handlinger ----
@@ -263,7 +246,6 @@ def main():
 
     api = Api(settings)
     listen_for_show(api)
-    threading.Thread(target=sync_wallpaper, args=(api.cfg, settings), daemon=True).start()
 
     window = webview.create_window(
         "MSR Launcher",

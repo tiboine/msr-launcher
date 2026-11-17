@@ -4,6 +4,17 @@
   "background": "",
   "desktop_wallpaper": "",
 
+  "firefox": {
+    "lock": true,
+    "homepage": "https://www.makerspaceringebu.no/",
+    "allowed": [
+      "https://www.makerspaceringebu.no/*",
+      "https://*.tinkercad.com/*",
+      "https://*.autodesk.com/*",
+      "https://makerworld.com/*"
+    ]
+  },
+
   "messages": [
     { "text": "Husk å lagre filene dine på minnepinne – maskinene ryddes jevnlig.", "type": "info" },
     { "text": "Spør en voksen før du starter laseren.", "type": "warning" }
