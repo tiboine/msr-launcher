@@ -52,7 +52,9 @@ chmod 755 /usr/local/bin/msr-launcher
 echo "==> Innstillinger i $ETC/settings.json"
 mkdir -p "$ETC" "$VAR"
 if [[ ! -f "$ETC/settings.json" ]]; then
-  read -rp "    Adresse til oppsett-fila (tom = bruk innebygd eksempel): " CFG_URL || true
+  DEFAULT_URL="https://www.makerspaceringebu.no/wp-json/msr-launcher/v1/config"
+  read -rp "    Adresse til oppsettet [$DEFAULT_URL]: " CFG_URL || true
+  CFG_URL="${CFG_URL:-$DEFAULT_URL}"
   read -rp "    PIN for å avslutte launcheren (tom = av): " PIN || true
   cat > "$ETC/settings.json" <<EOF
 {

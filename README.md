@@ -14,9 +14,14 @@ og nettsider. Knappen **«Vis skrivebord»** skjuler den; ikonet **MSR Launcher*
 | `install-mint.sh` | Installerer på en Linux Mint-maskin |
 
 ## Oppsettet styres fra nettsiden
+Flisene, beskjedene, åpningstidene, bakgrunnen og Firefox-låsingen redigeres i
+**WP-admin → Launcher** på makerspaceringebu.no (plugin «Makerspace Launcher»,
+egen mappe `plugins/msr-launcher/` i Makerspace-prosjektet). Maskinene henter
+oppsettet fra `https://www.makerspaceringebu.no/wp-json/msr-launcher/v1/config`.
+
 Hver maskin har en lokal fil `/etc/msr-launcher/settings.json` som sier *hvor*
-oppsettet ligger (`config_url`). Selve oppsettet (som programmer, beskjeder og
-bakgrunn) er én JSON-fil på nettsiden. Endrer du den, får alle maskinene det
+oppsettet ligger (`config_url`). Formatet er beskrevet under, for den som vil
+se hva som sendes. Endrer du den, får alle maskinene det
 nye oppsettet ved neste oppstart (eller innen 10 min). Uten nett brukes siste
 lagrede kopi.
 
