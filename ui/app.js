@@ -174,22 +174,37 @@
     render();
   }
 
-  // Forhåndsvisning i vanlig nettleser (uten Python): bruk eksempel-oppsettet.
+  // Forhåndsvisning i vanlig nettleser (uten Python).
+  //   ?draft=1          → ulagrede endringer fra WP-admin (localStorage)
+  //   ?config=<adresse> → lagret oppsett fra nettsiden
+  //   ellers            → eksempel-oppsettet
   function mockApi() {
-    let cfg = null;
+    const params = new URLSearchParams(location.search);
+    const load = async () => {
+      if (params.get("draft")) {
+        try {
+          const d = localStorage.getItem("msrl-draft");
+          if (d) return JSON.parse(d);
+        } catch (e) { /* faller tilbake */ }
+      }
+      const src = params.get("config") || "../config.example.json";
+      return (await fetch(src, { cache: "no-store" })).json();
+    };
     const get = async () => {
-      if (!cfg) cfg = await (await fetch("../config.example.json")).json();
+      const cfg = await load();
       return {
         ...cfg,
-        apps: cfg.apps.map((a) => ({ ...a, kind: a.url ? "url" : "cmd", available: a.url ? true : !!(a.cmd && a.cmd.linux) })),
-        machine: "forhåndsvisning", source: "innebygd", admin_enabled: true,
+        apps: (cfg.apps || []).filter((a) => !a.hidden).map((a) => ({
+          ...a, kind: a.url ? "url" : "cmd", available: a.url ? true : !!(a.cmd && a.cmd.linux),
+        })).filter((a) => a.kind === "url" || a.available),
+        machine: "Forhåndsvisning (Linux)", source: "nett", admin_enabled: true,
       };
     };
     return {
       get_state: get, reload: get,
       launch: async (id) => { toast("Ville startet: " + id); return { ok: true }; },
       hide: async () => toast("Ville vist skrivebordet"),
-      check_pin: async (p) => ({ ok: p === "1234" }),
+      check_pin: async () => ({ ok: true }),
       quit: async () => toast("Ville avsluttet"),
     };
   }
