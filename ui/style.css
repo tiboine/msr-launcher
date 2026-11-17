@@ -104,92 +104,109 @@ main::-webkit-scrollbar-thumb { background: var(--ink-300); border-radius: 10px;
 }
 .grid.scroll { height: auto; }
 
+/* ── Material 3-flis ──
+   Fargerollene regnes ut fra flisas egen farge (--c), som MD3 «tonal palette»:
+   container (mørk tone), shape (lys tone), on-container (tekst), glyph (ikon på formen). */
 .tile {
   --c: var(--turq);
+  --container: color-mix(in oklab, var(--c) 30%, #0d1017);
+  --shape: color-mix(in oklab, var(--c) 82%, #ffffff);
+  --glyph: color-mix(in oklab, var(--c) 38%, #05070d);
+  --on: color-mix(in oklab, var(--c) 12%, #ffffff);
+  --on-mu: color-mix(in oklab, var(--c) 30%, #c9cde0);
+  --art: 200px;
   position: relative; overflow: hidden; isolation: isolate;
   display: flex; flex-direction: column; justify-content: flex-end;
-  padding: clamp(18px, 2vw, 30px);
-  border-radius: var(--r);
-  border: 1px solid color-mix(in srgb, var(--c) 22%, var(--ink-300));
-  background:
-    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--c) 30%, transparent), transparent 60%),
-    linear-gradient(160deg, var(--ink-100), var(--ink-050) 70%);
-  color: inherit; font: inherit; text-align: left; cursor: pointer;
-  transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+  padding: clamp(20px, 2.2vw, 32px);
+  border: 0; border-radius: 28px;
+  background: var(--container);
+  color: var(--on); font: inherit; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-radius .45s cubic-bezier(.34,1.56,.64,1), transform .3s cubic-bezier(.2,.8,.2,1);
   animation: rise .5s both cubic-bezier(.2,.8,.2,1);
-  animation-delay: calc(var(--i, 0) * 40ms);
+  animation-delay: calc(var(--i, 0) * 45ms);
 }
-@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+@keyframes rise { from { opacity: 0; transform: translateY(16px) scale(.97); } }
 
-/* stort vannmerke-ikon i hjørnet */
-.tile .mark {
-  position: absolute; z-index: -1;
-  right: -8%; top: -10%;
-  width: 62%; height: auto; aspect-ratio: 1;
-  color: var(--c); opacity: .09;
-  transform: rotate(-12deg);
-  transition: opacity var(--t), transform .5s cubic-bezier(.2,.8,.2,1);
+/* grafikken: form + ikon som fyller flisa */
+.tile .art {
+  position: absolute; z-index: 0;
+  width: var(--art); height: var(--art);
+  right: calc(var(--art) * -.12); top: calc(var(--art) * -.1);
+  pointer-events: none;
 }
-.tile:hover .mark, .tile:focus-visible .mark { opacity: .16; transform: rotate(-6deg) scale(1.04); }
-
-.tile .badge-icon {
-  position: absolute; top: clamp(18px, 2vw, 30px); left: clamp(18px, 2vw, 30px);
-  width: clamp(56px, 5.2vw, 84px); aspect-ratio: 1; border-radius: 26%;
+.tile.wide .art { top: 50%; right: calc(var(--art) * -.06); margin-top: calc(var(--art) / -2); }
+.tile .shape { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--shape);
+  transition: transform .8s cubic-bezier(.34,1.56,.64,1); }
+.tile .glyph {
+  position: absolute; inset: 22%;
   display: grid; place-items: center;
-  color: var(--c);
-  background: color-mix(in srgb, var(--c) 14%, var(--ink-050));
-  border: 1px solid color-mix(in srgb, var(--c) 50%, transparent);
-  box-shadow: 0 0 28px -6px color-mix(in srgb, var(--c) 70%, transparent), inset 0 0 18px -8px var(--c);
-  font-size: clamp(28px, 2.6vw, 42px); line-height: 1;
+  color: var(--glyph);
+  transition: transform .5s cubic-bezier(.34,1.56,.64,1);
 }
-.tile .badge-icon svg { width: 56%; height: 56%; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--c) 70%, transparent)); }
-.tile .badge-icon img { width: 62%; height: 62%; object-fit: contain; }
+.tile .glyph svg { width: 100%; height: 100%; stroke-width: 1.9; }
+.tile .glyph .emoji { font-size: calc(var(--art) * .42); line-height: 1; }
 
-.tile .name { font-size: clamp(22px, 2vw, 34px); font-weight: 600; letter-spacing: -.015em; line-height: 1.1; }
-.tile .desc { color: var(--ink-600); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.35; margin-top: 6px; max-width: 34ch; }
-.tile .chips { position: absolute; top: clamp(18px, 2vw, 30px); right: clamp(18px, 2vw, 30px); display: flex; gap: 6px; }
-.chip {
-  font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
-  padding: 5px 10px; border-radius: 999px;
-  background: rgba(5,7,13,.55); border: 1px solid var(--ink-300); color: var(--ink-600);
-  backdrop-filter: blur(6px);
-}
-.chip.web { color: var(--turq); border-color: rgba(0,217,233,.35); }
+/* opplastet bilde/logo dekker hele flisa */
+.tile .art.photo { inset: 0; width: auto; height: auto; margin: 0; }
+.tile .art.photo img { width: 100%; height: 100%; object-fit: cover; }
+.tile .art.photo::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, var(--container) 8%, transparent 62%); }
 
-.tile .go {
-  position: absolute; right: clamp(18px, 2vw, 30px); bottom: clamp(18px, 2vw, 30px);
-  width: 44px; height: 44px; border-radius: 50%;
-  display: grid; place-items: center;
-  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
-  color: var(--c); opacity: 0; transform: translateX(-8px);
-  transition: opacity var(--t), transform var(--t);
+/* tekst nede til venstre, med en myk overgang så den alltid kan leses */
+.tile::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in oklab, var(--container) 92%, transparent) 0%, transparent 55%);
 }
-.tile .go svg { width: 20px; height: 20px; }
+.tile .label { position: relative; z-index: 3; max-width: 70%; }
+.tile.large .label { max-width: 60%; }
+.tile .name { font-size: clamp(24px, 2.2vw, 36px); font-weight: 600; letter-spacing: -.02em; line-height: 1.08; }
+.tile .desc { color: var(--on-mu); font-size: clamp(14px, 1.05vw, 17px); line-height: 1.35; margin-top: 6px; }
 
-.tile:hover, .tile:focus-visible {
-  transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--c) 70%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 50%, transparent), 0 18px 60px -18px var(--c);
-  outline: none;
+/* MD3 assist-chip */
+.tile .chip {
+  position: absolute; z-index: 3; top: clamp(16px, 1.8vw, 26px); left: clamp(16px, 1.8vw, 26px);
+  font-size: 13px; font-weight: 500; letter-spacing: .02em;
+  padding: 6px 12px; border-radius: 8px;
+  color: var(--on); background: color-mix(in oklab, var(--container) 70%, transparent);
+  border: 1px solid color-mix(in oklab, var(--on) 30%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
-.tile:hover .go, .tile:focus-visible .go { opacity: 1; transform: none; }
-.tile:active { transform: translateY(0) scale(.985); }
+
+/* state layer + ripple (MD3) */
+.tile .state { position: absolute; inset: 0; z-index: 2; background: var(--on); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.tile:hover .state { opacity: .08; }
+.tile:focus-visible .state { opacity: .12; }
+.tile:active .state { opacity: .12; }
+.tile:focus-visible { outline: 3px solid var(--shape); outline-offset: 3px; }
+.ripple {
+  position: absolute; z-index: 2; border-radius: 50%; pointer-events: none;
+  background: var(--on); opacity: .18; transform: scale(0);
+  animation: ripple .6s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+/* uttrykksfull bevegelse: formen snurrer, hjørnene blir rundere */
+.tile:hover { border-radius: 40px; }
+.tile:hover .shape { transform: rotate(24deg) scale(1.04); }
+.tile:hover .glyph { transform: scale(1.06) rotate(-4deg); }
+.tile:active { transform: scale(.98); border-radius: 48px; }
 
 /* stor flis */
-.tile.large { grid-column: span 2; grid-row: span 2; }
-.tile.large .badge-icon { width: clamp(80px, 7.5vw, 124px); }
-.tile.large .name { font-size: clamp(30px, 3.2vw, 54px); }
-.tile.large .desc { font-size: clamp(16px, 1.3vw, 21px); }
-.tile.large .mark { width: 70%; opacity: .12; }
+.tile.large { grid-column: span 2; grid-row: span 2; border-radius: 36px; }
+.tile.large:hover { border-radius: 52px; }
+.tile.large .name { font-size: clamp(34px, 3.6vw, 60px); }
+.tile.large .desc { font-size: clamp(16px, 1.35vw, 22px); }
 
-/* liten høyde: navnet ved siden av ikonet i stedet for under */
-.tile.compact { justify-content: center; padding-left: calc(clamp(56px, 5.2vw, 84px) + clamp(18px, 2vw, 30px) * 2); }
-.tile.compact .badge-icon { top: 50%; transform: translateY(-50%); }
+/* lav flis: litt mindre tekst */
+.tile.compact .name { font-size: clamp(20px, 1.7vw, 28px); }
+.tile.compact .desc { display: none; }
 
-.tile.missing { cursor: not-allowed; filter: grayscale(1); opacity: .45; }
-.tile.missing:hover { transform: none; box-shadow: none; }
-.tile.starting { animation: pulse 1s ease-in-out infinite; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 2px var(--c), 0 0 60px -10px var(--c); } }
+.tile.missing { cursor: not-allowed; filter: grayscale(1); opacity: .5; }
+.tile.missing:hover { border-radius: 28px; }
+.tile.missing:hover .shape, .tile.missing:hover .glyph { transform: none; }
+.tile.starting .shape { animation: spin 1.2s cubic-bezier(.5,0,.5,1) infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── bunn ── */
 .bottom {
@@ -202,11 +219,11 @@ button.ghost, button.danger {
   display: inline-flex; align-items: center; gap: 10px;
   font: inherit; font-size: 16px; color: var(--ink-700);
   padding: 12px 20px; border-radius: 999px; cursor: pointer;
-  background: rgba(18,23,42,.8); border: 1px solid var(--ink-300);
-  transition: border-color var(--t), background var(--t);
+  background: var(--ink-200); border: 0;
+  transition: background var(--t);
 }
 button.ghost svg { width: 20px; height: 20px; color: var(--turq); }
-button.ghost:hover { border-color: var(--turq); }
+button.ghost:hover { background: var(--ink-300); }
 button.danger { background: var(--orange-deep); border-color: var(--orange); }
 button.danger:hover { background: var(--orange); }
 
@@ -234,5 +251,5 @@ button.danger:hover { background: var(--orange); }
 .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; justify-content: flex-end; }
 
 @media (prefers-reduced-motion: reduce) {
-  .tile, .tile .mark, .tile .go { animation: none; transition: none; }
+  .tile, .tile .shape, .tile .glyph, .ripple { animation: none; transition: none; }
 }

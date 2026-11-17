@@ -38,19 +38,63 @@
   }
 
   const ICONS = window.MSR_ICONS || { list: {}, svg: () => null };
-  const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 
-  // Ikon: navn fra ikonsettet → SVG, adresse → bilde, ellers emoji/bokstav
-  function iconNode(app, cls) {
-    const box = el("div", cls);
-    const svg = ICONS.svg(app.icon);
-    if (svg) box.innerHTML = svg;
-    else if (isImage(app.icon)) {
+  // Material 3 Expressive-former (scallop/«cookie», kløver, sol …), tegnet som polarkurver
+  const SHAPES = [
+    { n: 9, a: 0.07 },  // cookie 9
+    { n: 4, a: 0.16 },  // kløver
+    { n: 12, a: 0.045 }, // cookie 12
+    { n: 6, a: 0.11 },  // blomst
+    { n: 8, a: 0.08 },  // sol
+    { n: 5, a: 0.13 },  // myk stjerne
+  ];
+  function shapePath(s) {
+    let d = "";
+    for (let k = 0; k <= 360; k += 2) {
+      const t = (k * Math.PI) / 180;
+      const r = 50 * (1 + s.a * Math.cos(s.n * t)) / (1 + s.a);
+      d += (k ? "L" : "M") + (50 + r * Math.cos(t)).toFixed(2) + " " + (50 + r * Math.sin(t)).toFixed(2);
+    }
+    return d + "Z";
+  }
+  function hash(str) {
+    let h = 0;
+    for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return h;
+  }
+
+  // Grafikken som dekker flisa: bilde (helt ut i kantene) eller form + stort ikon
+  function art(app) {
+    const box = el("div", "art");
+    if (isImage(app.icon)) {
+      box.classList.add("photo");
       const img = document.createElement("img");
       img.src = app.icon; img.alt = "";
       box.appendChild(img);
-    } else box.textContent = app.icon || (app.name || "?").charAt(0).toUpperCase();
+      return box;
+    }
+    const s = SHAPES[hash(app.id || app.name) % SHAPES.length];
+    box.insertAdjacentHTML("beforeend",
+      '<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><path d="' + shapePath(s) + '"/></svg>');
+    const g = el("div", "glyph");
+    const svg = ICONS.svg(app.icon);
+    if (svg) g.innerHTML = svg;
+    else g.appendChild(el("span", "emoji", app.icon || (app.name || "?").charAt(0).toUpperCase()));
+    box.appendChild(g);
     return box;
+  }
+
+  // Material-ripple der du trykker
+  function ripple(e) {
+    const b = e.currentTarget;
+    const r = b.getBoundingClientRect();
+    const size = Math.hypot(r.width, r.height) * 2;
+    const s = el("span", "ripple");
+    s.style.width = s.style.height = size + "px";
+    s.style.left = e.clientX - r.left - size / 2 + "px";
+    s.style.top = e.clientY - r.top - size / 2 + "px";
+    b.appendChild(s);
+    setTimeout(() => s.remove(), 650);
   }
 
   function tile(app, i) {
@@ -61,24 +105,31 @@
     if (app.size === "large") b.classList.add("large");
     if (!app.available) b.classList.add("missing");
 
-    // Stort, svakt vannmerke (bare for ikoner fra ikonsettet)
-    const mark = ICONS.svg(app.icon, "mark");
-    if (mark) b.insertAdjacentHTML("beforeend", mark);
+    b.appendChild(art(app));
+    b.appendChild(el("span", "state"));
 
-    b.appendChild(iconNode(app, "badge-icon"));
-    const chips = el("div", "chips");
-    if (!app.available) chips.appendChild(el("span", "chip", "Ikke installert"));
-    else if (app.kind === "url") chips.appendChild(el("span", "chip web", "På nett"));
-    if (chips.childNodes.length) b.appendChild(chips);
+    if (!app.available) b.appendChild(el("span", "chip", "Ikke installert"));
+    else if (app.kind === "url") b.appendChild(el("span", "chip", "På nett"));
 
-    const text = el("div", "text");
-    text.appendChild(el("div", "name", app.name));
-    if (app.description) text.appendChild(el("div", "desc", app.description));
-    b.appendChild(text);
-    if (app.available) b.insertAdjacentHTML("beforeend", '<span class="go">' + ARROW + "</span>");
+    const label = el("div", "label");
+    label.appendChild(el("div", "name", app.name));
+    if (app.description) label.appendChild(el("div", "desc", app.description));
+    b.appendChild(label);
 
+    b.addEventListener("pointerdown", ripple);
     b.addEventListener("click", () => launch(app, b));
     return b;
+  }
+
+  // Størrelse på grafikken etter flisas form
+  function sizeArt() {
+    document.querySelectorAll(".tile").forEach((t) => {
+      const w = t.clientWidth, h = t.clientHeight;
+      const wide = w / h > 1.25;
+      const size = wide ? Math.min(h * 1.25, w * 0.72) : Math.min(w * 0.95, h * 0.95);
+      t.style.setProperty("--art", Math.round(size) + "px");
+      t.classList.toggle("wide", wide);
+    });
   }
 
   // Velg antall kolonner/rader så flisene fyller skjermen uten å bli for flate
@@ -119,8 +170,9 @@
     tiles.forEach((t) => {
       if (!best.useLarge) t.classList.remove("large");
       else if (t.dataset.large) t.classList.add("large");
-      t.classList.toggle("compact", rowH < 230 && !t.classList.contains("large"));
+      t.classList.toggle("compact", rowH < 200 && !t.classList.contains("large"));
     });
+    sizeArt();
   }
   let layoutTimer;
   window.addEventListener("resize", () => { clearTimeout(layoutTimer); layoutTimer = setTimeout(layout, 60); });
