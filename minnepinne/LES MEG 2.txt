@@ -1,0 +1,71 @@
+MSR LAUNCHER – KOMMANDOER
+=========================
+
+Alle kommandoer skrives i en terminal på Mint-maskinen,
+innlogget med ADMIN-kontoen (ikke makerspace-kontoen).
+Passordet vises ikke mens du skriver – det er normalt.
+
+
+INSTALLERE FRA MINNEPINNEN
+--------------------------
+Høyreklikk på et tomt sted i MSR-Launcher-mappa → «Åpne i terminal», og skriv:
+
+    sudo bash INSTALLER.sh
+
+
+INSTALLERE UTEN MINNEPINNE (rett fra nett)
+------------------------------------------
+
+    wget -qO- https://raw.githubusercontent.com/tiboine/msr-launcher/main/get.sh | sudo bash
+
+
+OPPDATERE TIL NYESTE VERSJON
+----------------------------
+Kjør en av installasjonskommandoene over på nytt. Innstillingene beholdes.
+
+
+FINNE BRUKERNAVNET TIL MAKERSPACE-KONTOEN
+-----------------------------------------
+
+    ls /home
+
+
+SJEKKE HVORDAN BAMBU STUDIO ER INSTALLERT
+-----------------------------------------
+
+    flatpak list | grep -i bambu
+    which bambu-studio
+
+
+HENTE OPPSETTET FRA NETTSIDEN MED EN GANG
+-----------------------------------------
+(Firefox-regler og skrivebordsbakgrunn – ellers skjer det hvert 15. minutt)
+
+    sudo systemctl start msr-sync
+
+Se hva den gjorde:
+
+    journalctl -u msr-sync -n 30
+
+
+ENDRE PIN ELLER ADRESSE TIL OPPSETTET
+-------------------------------------
+
+    sudo nano /etc/msr-launcher/settings.json
+
+Lagre med Ctrl+O, Enter, og lukk med Ctrl+X.
+
+
+SE FIREFOX-REGLENE SOM ER I BRUK
+--------------------------------
+
+    cat /etc/firefox/policies/policies.json
+
+
+STARTE LAUNCHEREN I VINDU (for feilsøking)
+------------------------------------------
+
+    msr-launcher --windowed
+
+Hvis den ikke starter, vises feilmeldingen i terminalen.
+Ta bilde av den og send den videre.
