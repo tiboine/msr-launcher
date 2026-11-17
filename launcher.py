@@ -103,7 +103,7 @@ def prepare_apps(cfg: dict) -> list[dict]:
     for app in cfg.get("apps", []):
         if app.get("hidden"):
             continue
-        a = {k: app.get(k) for k in ("id", "name", "description", "icon", "color", "category")}
+        a = {k: app.get(k) for k in ("id", "name", "description", "icon", "color", "category", "size")}
         if app.get("url"):
             a["kind"] = "url"
             a["available"] = True

@@ -3,7 +3,6 @@
   "subtitle": "Hva vil du lage i dag?",
   "background": "",
   "desktop_wallpaper": "",
-
   "firefox": {
     "lock": true,
     "homepage": "https://www.makerspaceringebu.no/",
@@ -14,51 +13,75 @@
       "https://makerworld.com/*"
     ]
   },
-
   "messages": [
-    { "text": "Husk å lagre filene dine på minnepinne – maskinene ryddes jevnlig.", "type": "info" },
-    { "text": "Spør en voksen før du starter laseren.", "type": "warning" }
-  ],
-
-  "hours": [
-    { "label": "Tirsdag", "time": "18:00–20:00" }
-  ],
-
-  "categories": [
-    { "id": "3d", "name": "3D-print" },
-    { "id": "laser", "name": "Laser og tegning" },
-    { "id": "kode", "name": "Programmering" },
-    { "id": "annet", "name": "Annet" }
-  ],
-
-  "apps": [
     {
-      "id": "makercraft",
-      "name": "MakerCraft",
-      "description": "Tegn i 3D og send til printeren",
-      "category": "3d",
-      "icon": "🧊",
-      "color": "#ff7a18",
-      "url": "https://www.makerspaceringebu.no/makercraft/"
+      "text": "Husk å lagre filene dine på minnepinne – maskinene ryddes jevnlig.",
+      "type": "info"
     },
+    {
+      "text": "Spør en voksen før du starter laseren.",
+      "type": "warning"
+    }
+  ],
+  "hours": [
+    {
+      "label": "Tirsdag",
+      "time": "18:00–20:00"
+    }
+  ],
+  "categories": [
+    {
+      "id": "3d",
+      "name": "3D-print"
+    },
+    {
+      "id": "laser",
+      "name": "Laser og tegning"
+    },
+    {
+      "id": "kode",
+      "name": "Programmering"
+    },
+    {
+      "id": "annet",
+      "name": "Annet"
+    }
+  ],
+  "apps": [
     {
       "id": "bambu",
       "name": "Bambu Studio",
       "description": "Gjør klar fila for 3D-printeren",
       "category": "3d",
-      "icon": "🖨️",
+      "icon": "printer",
       "color": "#00d9e9",
       "cmd": {
-        "linux": ["flatpak", "run", "com.bambulab.BambuStudio"],
-        "windows": ["%ProgramFiles%\\Bambu Studio\\bambu-studio.exe"]
-      }
+        "linux": [
+          "flatpak",
+          "run",
+          "com.bambulab.BambuStudio"
+        ],
+        "windows": [
+          "%ProgramFiles%\\Bambu Studio\\bambu-studio.exe"
+        ]
+      },
+      "size": "large"
+    },
+    {
+      "id": "makercraft",
+      "name": "MakerCraft",
+      "description": "Tegn i 3D og send til printeren",
+      "category": "3d",
+      "icon": "cube",
+      "color": "#ff7a18",
+      "url": "https://www.makerspaceringebu.no/makercraft/"
     },
     {
       "id": "tinkercad",
       "name": "Tinkercad",
       "description": "3D-tegning i nettleseren",
       "category": "3d",
-      "icon": "🧱",
+      "icon": "bricks",
       "color": "#00d9e9",
       "url": "https://www.tinkercad.com/"
     },
@@ -67,7 +90,7 @@
       "name": "MakerLaser",
       "description": "Tegn noe som laseren kan skjære",
       "category": "laser",
-      "icon": "✏️",
+      "icon": "laser",
       "color": "#ff7a18",
       "url": "https://www.makerspaceringebu.no/makerlaser/"
     },
@@ -76,11 +99,15 @@
       "name": "Inkscape",
       "description": "Vektortegning til laser og vinylkutter",
       "category": "laser",
-      "icon": "🖋️",
+      "icon": "pen",
       "color": "#00d9e9",
       "cmd": {
-        "linux": ["inkscape"],
-        "windows": ["%ProgramFiles%\\Inkscape\\bin\\inkscape.exe"]
+        "linux": [
+          "inkscape"
+        ],
+        "windows": [
+          "%ProgramFiles%\\Inkscape\\bin\\inkscape.exe"
+        ]
       }
     },
     {
@@ -88,7 +115,7 @@
       "name": "Scratch",
       "description": "Lag spill med klosser",
       "category": "kode",
-      "icon": "🐱",
+      "icon": "blocks",
       "color": "#ff7a18",
       "url": "https://scratch.mit.edu/projects/editor/"
     },
@@ -97,20 +124,28 @@
       "name": "Thonny",
       "description": "Python for nybegynnere",
       "category": "kode",
-      "icon": "🐍",
+      "icon": "terminal",
       "color": "#00d9e9",
-      "cmd": { "linux": ["thonny"] }
+      "cmd": {
+        "linux": [
+          "thonny"
+        ]
+      }
     },
     {
       "id": "arduino",
       "name": "Arduino IDE",
       "description": "Programmer mikrokontrollere",
       "category": "kode",
-      "icon": "🔌",
+      "icon": "chip",
       "color": "#00d9e9",
       "cmd": {
-        "linux": ["arduino-ide"],
-        "windows": ["%ProgramFiles%\\Arduino IDE\\Arduino IDE.exe"]
+        "linux": [
+          "arduino-ide"
+        ],
+        "windows": [
+          "%ProgramFiles%\\Arduino IDE\\Arduino IDE.exe"
+        ]
       }
     },
     {
@@ -118,20 +153,28 @@
       "name": "Nettleser",
       "description": "Firefox",
       "category": "annet",
-      "icon": "🌐",
+      "icon": "globe",
       "color": "#7a83a7",
-      "cmd": { "linux": ["firefox"] }
+      "cmd": {
+        "linux": [
+          "firefox"
+        ]
+      }
     },
     {
       "id": "filer",
       "name": "Filer",
       "description": "Minnepinne og dokumenter",
       "category": "annet",
-      "icon": "📁",
+      "icon": "folder",
       "color": "#7a83a7",
       "cmd": {
-        "linux": ["nemo"],
-        "windows": ["explorer.exe"]
+        "linux": [
+          "nemo"
+        ],
+        "windows": [
+          "explorer.exe"
+        ]
       }
     }
   ]

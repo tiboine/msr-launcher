@@ -37,30 +37,93 @@
     return /^(https?:|data:|\.{0,2}\/)|\.(png|svg|jpe?g|webp)$/i.test(icon || "");
   }
 
-  function tile(app) {
-    const b = el("button", "tile");
-    b.type = "button";
-    if (app.color) b.style.setProperty("--c", app.color);
-    if (app.kind === "url") b.classList.add("web");
-    if (!app.available) b.classList.add("missing");
+  const ICONS = window.MSR_ICONS || { list: {}, svg: () => null };
+  const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 
-    const icon = el("div", "icon");
-    if (isImage(app.icon)) {
+  // Ikon: navn fra ikonsettet → SVG, adresse → bilde, ellers emoji/bokstav
+  function iconNode(app, cls) {
+    const box = el("div", cls);
+    const svg = ICONS.svg(app.icon);
+    if (svg) box.innerHTML = svg;
+    else if (isImage(app.icon)) {
       const img = document.createElement("img");
       img.src = app.icon; img.alt = "";
-      icon.appendChild(img);
-    } else {
-      icon.textContent = app.icon || (app.name || "?").charAt(0);
-    }
-    b.appendChild(icon);
-    b.appendChild(el("div", "name", app.name));
-    if (app.description) b.appendChild(el("div", "desc", app.description));
-    if (!app.available) b.appendChild(el("div", "badge", "Ikke installert"));
-    else if (app.kind === "url") b.appendChild(el("div", "badge", "på nett"));
+      box.appendChild(img);
+    } else box.textContent = app.icon || (app.name || "?").charAt(0).toUpperCase();
+    return box;
+  }
+
+  function tile(app, i) {
+    const b = el("button", "tile");
+    b.type = "button";
+    b.style.setProperty("--i", i);
+    if (app.color) b.style.setProperty("--c", app.color);
+    if (app.size === "large") b.classList.add("large");
+    if (!app.available) b.classList.add("missing");
+
+    // Stort, svakt vannmerke (bare for ikoner fra ikonsettet)
+    const mark = ICONS.svg(app.icon, "mark");
+    if (mark) b.insertAdjacentHTML("beforeend", mark);
+
+    b.appendChild(iconNode(app, "badge-icon"));
+    const chips = el("div", "chips");
+    if (!app.available) chips.appendChild(el("span", "chip", "Ikke installert"));
+    else if (app.kind === "url") chips.appendChild(el("span", "chip web", "På nett"));
+    if (chips.childNodes.length) b.appendChild(chips);
+
+    const text = el("div", "text");
+    text.appendChild(el("div", "name", app.name));
+    if (app.description) text.appendChild(el("div", "desc", app.description));
+    b.appendChild(text);
+    if (app.available) b.insertAdjacentHTML("beforeend", '<span class="go">' + ARROW + "</span>");
 
     b.addEventListener("click", () => launch(app, b));
     return b;
   }
+
+  // Velg antall kolonner/rader så flisene fyller skjermen uten å bli for flate
+  function layout() {
+    const grid = $("grid");
+    const tiles = [...grid.children];
+    if (!tiles.length) return;
+    const main = $("main");
+    const cs = getComputedStyle(main);
+    const W = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const H = main.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const gap = parseFloat(getComputedStyle(grid).columnGap) || 16;
+    const large = tiles.filter((t) => t.classList.contains("large")).length;
+    const n = tiles.length;
+
+    let best = null;
+    for (let cols = 1; cols <= 6; cols++) {
+      const useLarge = cols >= 3 && large > 0;
+      const cells = n + (useLarge ? large * 3 : 0);
+      let rows = Math.ceil(cells / cols);
+      if (useLarge) rows = Math.max(rows, 2);
+      const cw = (W - gap * (cols - 1)) / cols;
+      const ch = (H - gap * (rows - 1)) / rows;
+      if (cw < 200) continue;
+      const empty = rows * cols - cells;
+      // mål: litt bredere enn høye fliser, få tomme felt, ikke for lave
+      const score = Math.abs(Math.log((cw / ch) / 1.35)) + empty * 0.18 + (ch < 160 ? 5 : 0);
+      if (!best || score < best.score) best = { cols, rows, ch, useLarge, score };
+    }
+    if (!best) best = { cols: 1, rows: n, ch: 160, useLarge: false };
+
+    const scroll = best.ch < 160;
+    grid.classList.toggle("scroll", scroll);
+    grid.style.setProperty("--cols", best.cols);
+    grid.style.gridTemplateRows = scroll ? "" : `repeat(${best.rows}, minmax(0, 1fr))`;
+    grid.style.gridAutoFlow = "row dense";
+    const rowH = scroll ? 180 : best.ch;
+    tiles.forEach((t) => {
+      if (!best.useLarge) t.classList.remove("large");
+      else if (t.dataset.large) t.classList.add("large");
+      t.classList.toggle("compact", rowH < 230 && !t.classList.contains("large"));
+    });
+  }
+  let layoutTimer;
+  window.addEventListener("resize", () => { clearTimeout(layoutTimer); layoutTimer = setTimeout(layout, 60); });
 
   function render() {
     if (!state) return;
@@ -89,23 +152,14 @@
       hours.appendChild(line);
     });
 
-    // Grupper i kategorier (i den rekkefølgen de står i oppsettet)
-    const cats = (state.categories || []).slice();
-    const known = new Set(cats.map((c) => c.id));
-    if (state.apps.some((a) => !known.has(a.category))) cats.push({ id: null, name: "Andre" });
-
-    const sections = $("sections");
-    sections.replaceChildren();
-    cats.forEach((c) => {
-      const apps = state.apps.filter((a) => (c.id === null ? !known.has(a.category) : a.category === c.id));
-      if (!apps.length) return;
-      const s = el("section", "section");
-      s.appendChild(el("h2", null, c.name));
-      const g = el("div", "grid");
-      apps.forEach((a) => g.appendChild(tile(a)));
-      s.appendChild(g);
-      sections.appendChild(s);
-    });
+    // Flisene i samme rekkefølge som i WP-admin
+    const grid = $("grid");
+    grid.replaceChildren(...state.apps.map((a, i) => {
+      const t = tile(a, i);
+      if (a.size === "large") t.dataset.large = "1";
+      return t;
+    }));
+    requestAnimationFrame(layout);
 
     const src = { nett: "", "lokal kopi": " · uten nett (lokal kopi)", innebygd: " · standardoppsett" }[state.source] || "";
     $("meta").textContent = (state.machine || "") + src;
